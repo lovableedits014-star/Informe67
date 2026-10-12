@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f7f4">
+    <meta name="description" content="Acompanhe as histórias e os assuntos que fazem parte do dia a dia de Campo Grande, a Cidade Morena.">
+    <title>Campo Grande: histórias e mudanças que movimentam a Capital — Informe67</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="informe67-api" content="">
+    <script src="public-api.js" defer></script>
+    <script src="noticia.js" defer></script>
+  </head>
+  <body>
+    <div class="topline">
+      <div class="shell topline-inner">
+        <p>A notícia perto de você, sempre.</p>
+        <p id="today"></p>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="shell header-main">
+        <a class="brand" href="index.html" aria-label="Informe67 — página inicial">
+          <span class="brand-mark">67</span>
+          <span class="brand-name">informe<span>67</span></span>
+        </a>
+        <p class="header-motto">Informação que importa.</p>
+        <form class="search" role="search" action="index.html" method="get">
+          <label class="visually-hidden" for="search-input">Buscar notícias</label>
+          <input id="search-input" name="busca" type="search" placeholder="Buscar notícias..." autocomplete="off">
+          <button type="submit" aria-label="Buscar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+          </button>
+        </form>
+      </div>
+      <nav class="category-nav" aria-label="Categorias de notícias">
+        <div class="shell nav-inner">
+          <a class="nav-link" href="index.html#ultimas">Todas</a>
+          <a class="nav-link active" href="index.html#ultimas" aria-current="page">Campo Grande</a>
+          <a class="nav-link" href="index.html#ultimas">Mato Grosso do Sul</a>
+          <a class="nav-link" href="index.html#ultimas">Brasil</a>
+          <a class="nav-link" href="index.html#ultimas">Mundo</a>
+          <a class="nav-link" href="index.html#ultimas">Esporte</a>
+          <a class="nav-link" href="index.html#ultimas">Cultura</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="article-page">
+      <div class="shell">
+        <nav class="breadcrumbs" aria-label="Você está aqui">
+          <a href="index.html">Início</a>
+          <span aria-hidden="true">/</span>
+          <a href="index.html#ultimas">Campo Grande</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Notícia</span>
+        </nav>
+
+        <article class="article">
+          <header class="article-header">
+            <p class="article-category"><span></span> CIDADE <span class="category-divider">·</span> CAMPO GRANDE</p>
+            <h1>Campo Grande: histórias e mudanças que movimentam a Capital</h1>
+            <p class="article-deck">Acompanhe os assuntos que fazem parte do dia a dia de quem vive na Cidade Morena — com informação, contexto e espaço para as histórias da comunidade.</p>
+            <div class="article-byline">
+              <div class="author-avatar" aria-hidden="true">I67</div>
+              <div class="author-details">
+                <span>Redação Informe67</span>
+                <span>Campo Grande, Mato Grosso do Sul</span>
+              </div>
+              <div class="article-date">
+                <time id="article-date"></time>
+                <span>Leitura: 4 minutos</span>
+              </div>
+              <button class="share-button" id="share-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg>
+                Compartilhar
+              </button>
+            </div>
+            <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
+          </header>
+
+          <figure class="article-hero">
+            <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1800&q=85" alt="Rua de uma cidade iluminada ao entardecer" fetchpriority="high">
+            <figcaption>Uma cidade é feita das histórias de quem vive nela. <span>Imagem ilustrativa</span></figcaption>
+          </figure>
+
+          <div class="article-layout">
+            <aside class="article-aside" aria-label="Informações da matéria">
+              <span class="aside-label">NESTA MATÉRIA</span>
+              <a href="#olhar-local">Um olhar local</a>
+              <a href="#informe67">O papel da informação</a>
+              <a class="back-to-news" href="index.html#ultimas">← Voltar às notícias</a>
+            </aside>
+
+            <div class="article-body">
+              <p class="article-demo-note">Texto demonstrativo para apresentação do portal.</p>
+              <p class="article-lead">Campo Grande é mais do que o endereço que aparece no mapa: é o lugar onde a rotina, as ideias e as experiências de seus moradores se encontram. Contar essas histórias é também uma forma de entender a cidade.</p>
+
+              <h2 id="olhar-local">Um olhar atento para a cidade</h2>
+              <p>As notícias locais ajudam a acompanhar o que acontece nos bairros, os serviços que fazem parte do cotidiano e as iniciativas de quem trabalha para transformar a comunidade. Cada pauta ganha sentido quando é apresentada com contexto e escuta.</p>
+              <p>Do centro às diferentes regiões da Capital, há assuntos que merecem ser vistos de perto. O Informe67 abre espaço para esse olhar, aproximando os leitores dos temas que atravessam o dia a dia de Campo Grande.</p>
+
+              <blockquote>
+                <p>Informação local é aquela que ajuda a gente a compreender melhor o lugar onde vive.</p>
+              </blockquote>
+
+              <h2 id="informe67">O papel da informação</h2>
+              <p>Nosso compromisso é publicar conteúdo claro, responsável e relevante. A cobertura jornalística se constrói com apuração, fontes identificadas e atenção à diversidade de perspectivas — princípios que orientam cada história publicada no portal.</p>
+              <p>Esta página apresenta o formato de uma matéria do Informe67. Os textos são ilustrativos e podem ser substituídos pelas reportagens apuradas da equipe editorial.</p>
+
+              <div class="article-tags">
+                <span>Leia também:</span>
+                <a href="index.html#ultimas">Campo Grande</a>
+                <a href="index.html#ultimas">Mato Grosso do Sul</a>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <section class="shell more-news" aria-labelledby="more-news-title">
+        <div class="more-news-heading">
+          <div>
+            <p class="section-kicker"><span></span> CONTINUE INFORMADO</p>
+            <h2 id="more-news-title">Mais notícias para você</h2>
+          </div>
+          <a href="index.html#ultimas">Ver todas <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="more-news-card">
+          <div>
+            <p class="eyebrow">INFORME67</p>
+            <h3>Notícias de Campo Grande, de Mato Grosso do Sul e do mundo.</h3>
+          </div>
+          <a class="newsletter-link" href="index.html#ultimas">Explorar notícias <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <a class="brand footer-brand" href="index.html" aria-label="Informe67 — página inicial">
+          <span class="brand-mark">67</span>
+          <span class="brand-name">informe<span>67</span></span>
+        </a>
+        <p>Notícias de Campo Grande, de Mato Grosso do Sul e do mundo.</p>
+        <span class="demo-note">Conteúdo demonstrativo para apresentação do portal.</span>
+        <span class="copyright">© <span id="year"></span> Informe67</span>
+      </div>
+    </footer>
+  </body>
+</html>

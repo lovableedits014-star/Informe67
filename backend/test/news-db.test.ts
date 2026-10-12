@@ -1,0 +1,72 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { config } from "dotenv";
+import { Pool } from "pg";
+import { randomUUID } from "node:crypto";
+import { readMigrationConfig } from "../src/db/migration-config.js";
+import { createNewsStore } from "../src/news/store.js";
+import { createAdminStore } from "../src/admin/store.js";
+import { newsPermissions, validateNews } from "../src/news/validation.js";
+
+test("PostgreSQL news lifecycle, relations, conflicts and scheduling are exercised inside a rollback", { skip: process.env.RUN_DB_TESTS !== "1" }, async () => {
+  config(); const pool = new Pool({ ...readMigrationConfig(process.env), max: 1 }); const client = await pool.connect();
+  try {
+    assert.equal((await client.query("SELECT current_database() AS database")).rows[0].database, "informe67");
+    await client.query("BEGIN");
+    const user = (await client.query("SELECT id FROM public.users ORDER BY id LIMIT 1")).rows[0];
+    assert.ok(user, "Create the initial administrator before running this integration test");
+    // Store transactions become savepoints; the outer transaction always rolls back.
+    const connection = { query: (query: any, values?: any) => {
+      const text = typeof query === "string" ? query : query.text;
+      const control = text.trim().toLowerCase();
+      if (control === "begin") return client.query("SAVEPOINT news_test");
+      if (control === "commit") return client.query("RELEASE SAVEPOINT news_test");
+      if (control === "rollback") return client.query("ROLLBACK TO SAVEPOINT news_test");
+      return client.query(query, values);
+    } };
+    const store = createNewsStore(connection as unknown as Pool, async () => {});
+    const slug = `test-${randomUUID()}`, categoryId = randomUUID();
+    await client.query("INSERT INTO categories(id,name,slug) VALUES($1,$2,$3)", [categoryId, "Integration", slug]);
+    const imageUrl = `/media/news/${randomUUID()}.webp`;
+    const input = { title: "Integration test", slug, content: `<p>Texto<img src="${imageUrl}" alt="Foto"></p>`, status: "draft", categoryId, tags: [slug], images: [{ imageUrl, altText: "Foto", isCover: true }] };
+    const draft = await store.save(undefined, validateNews(input), user.id, newsPermissions);
+    assert.equal(draft.tags.length, 1); assert.equal(draft.images.length, 1); assert.equal(draft.authorId, user.id);
+    assert.equal((await store.get(draft.id))?.images[0].isCover, true);
+    await assert.rejects(store.save(draft.id, validateNews({ ...input, version: new Date(0).toISOString() }), user.id, newsPermissions), { statusCode: 409 });
+    await assert.rejects(store.save(undefined, validateNews(input), user.id, newsPermissions), { statusCode: 409 });
+    const published = await store.save(draft.id, validateNews({ ...input, status: "published", isFeatured: true, version: draft.updatedAt.toISOString() }), user.id, newsPermissions);
+    assert.ok(published.publishedAt); assert.ok((await store.publicList(true)).some((n: any) => n.id === draft.id));
+    assert.equal((await store.publicBySlug!(slug))?.categoryName, "Integration");
+    const browse=await store.publicBrowse!({page:1,pageSize:1,category:slug,search:''});
+    assert.equal(browse.total,1); assert.equal(browse.items.length,1);
+    assert.equal(browse.categories.find(c=>c.slug===slug)?.highlight.id,draft.id);
+    assert.equal((await store.publicBrowse!({page:2,pageSize:1,category:slug,search:''})).items.length,0);
+    await assert.rejects(store.save(draft.id, validateNews({ ...input, version: published.updatedAt.toISOString() }), user.id, ["news.edit"]), { statusCode: 403 });
+    const archived = await store.save(draft.id, validateNews({ ...input, status: "archived", version: published.updatedAt.toISOString() }), user.id, newsPermissions);
+    assert.equal(archived.status, "archived"); assert.ok(!(await store.publicList(false)).some((n: any) => n.id === draft.id));
+    assert.equal(await store.publicBySlug!(slug), undefined);
+    const scheduled = await store.save(draft.id, validateNews({ ...input, status: "scheduled", scheduledAt: new Date(Date.now() + 60000).toISOString(), version: archived.updatedAt.toISOString() }), user.id, newsPermissions);
+    assert.equal(scheduled.status, "scheduled");
+    await client.query("UPDATE news SET scheduled_at=now()-interval '1 minute' WHERE id=$1", [draft.id]);
+    assert.ok(await store.publishDue() >= 1); assert.equal((await store.get(draft.id))?.status, "published");
+    const list = await store.list({ page: 1, search: "Integration test", status: "published" }); assert.ok(list.items.some(n => n.id === draft.id));
+    const options = await store.options(); assert.ok(options.categories.some(c => c.id === categoryId));
+    const categories=createAdminStore(connection as unknown as Pool);
+    const targetId=randomUUID();await client.query('INSERT INTO categories(id,name,slug) VALUES($1,$2,$3)',[targetId,'Target',`${slug}-target`]);
+    const name=`São Paulo ${slug}`;const edited=await categories.editCategory!(categoryId,name,user.id);
+    assert.equal(edited.slug,`sao-paulo-${slug}`);assert.equal((await store.get(draft.id))?.categoryId,categoryId);
+    await assert.rejects(categories.editCategory!(targetId,name,user.id),{statusCode:409});
+    assert.equal((await client.query('SELECT name FROM categories WHERE id=$1',[targetId])).rows[0].name,'Target');
+    await assert.rejects(categories.editCategory!(categoryId,'   ',user.id),{statusCode:400});
+    await assert.rejects(categories.deleteCategory!(categoryId,null,user.id,true),{statusCode:409});
+    await assert.rejects(categories.deleteCategory!(categoryId,categoryId,user.id,true),{statusCode:400});
+    await assert.rejects(categories.deleteCategory!(categoryId,targetId,user.id,false),{statusCode:403});
+    const before=await store.get(draft.id);
+    assert.deepEqual(await categories.deleteCategory!(categoryId,targetId,user.id,true),{moved:1});
+    const after=await store.get(draft.id);assert.equal(after?.categoryId,targetId);assert.equal(after?.status,before?.status);assert.equal(after?.content,before?.content);assert.deepEqual(after?.publishedAt,before?.publishedAt);
+    assert.equal((await client.query('SELECT id FROM categories WHERE id=$1',[categoryId])).rows.length,0);
+    await assert.rejects(categories.deleteCategory!(categoryId,null,user.id,true),{statusCode:404});
+    const emptyId=randomUUID();await client.query('INSERT INTO categories(id,name,slug) VALUES($1,$2,$3)',[emptyId,'Empty',`${slug}-empty`]);
+    assert.deepEqual(await categories.deleteCategory!(emptyId,null,user.id,false),{moved:0});
+  } finally { await client.query("ROLLBACK"); client.release(); await pool.end(); }
+});

@@ -1,0 +1,9 @@
+node_modules
+dist
+test
+backups
+.private
+uploads
+.env
+.env.*
+npm-debug.log*

@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+node_modules/
+backend/node_modules/
+backend/dist/
+backend/uploads/
+backend/public/admin/vendor/
+backend/backups/
+backend/.private/
+*.dump
+*.backup
+*.pgdump
+*.bak
+*.sql.gz
+npm-debug.log*

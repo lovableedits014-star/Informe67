@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Painel administrativo · Informe67</title>
+  <link rel="stylesheet" href="/admin/admin.css">
+  <link rel="stylesheet" href="/admin/vendor/quill.snow.css">
+  <script src="/admin/vendor/quill.js" defer></script>
+  <script src="/admin/news.js" defer></script>
+  <script src="/admin/rewrite.js" defer></script>
+  <script src="/admin/ai-settings.js" defer></script>
+  <script src="/admin/categories.js" defer></script>
+  <script src="/admin/banners.js" defer></script>
+  <script src="/admin/users.js" defer></script>
+  <script src="/admin/admin.js" defer></script>
+</head>
+<body>
+  <div id="boot" role="status">Carregando o painel…</div>
+  <main id="login" class="login-page" hidden>
+    <section class="login-story">
+      <a class="brand" href="/admin/"><span class="brand-mark">67</span> informe<span>67</span></a>
+      <div><p class="eyebrow">ÁREA EDITORIAL</p><h1>Informação que<br>faz a diferença.</h1><p>Um espaço para organizar o conteúdo<br>e conectar o Informe67 aos seus leitores.</p></div>
+      <span class="story-footer">Campo Grande · Mato Grosso do Sul</span>
+    </section>
+    <section class="login-form-wrap">
+      <form id="login-form" class="login-form">
+        <p class="eyebrow">PAINEL ADMINISTRATIVO</p><h2>Bem-vindo de volta.</h2><p class="muted">Entre com sua conta para acessar o painel.</p>
+        <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="320" placeholder="Seu e-mail" required>
+        <label for="password">Senha</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" maxlength="1024" required><button id="show-password" type="button" aria-controls="password" aria-pressed="false">Mostrar</button></div>
+        <p id="login-error" class="error" role="alert"></p>
+        <button id="login-submit" class="primary" type="submit">Entrar no painel <span aria-hidden="true">→</span></button>
+        <p class="login-note">Acesso exclusivo para a equipe autorizada.<br>Precisa de acesso? Fale com o administrador.</p>
+      </form>
+    </section>
+  </main>
+  <div id="panel" class="panel" hidden>
+    <aside id="sidebar" class="sidebar">
+      <a class="brand" href="/admin/"><span class="brand-mark">67</span> informe<span>67</span></a>
+      <p class="nav-caption">ESPAÇO DE TRABALHO</p>
+      <nav id="navigation" aria-label="Menu administrativo"></nav>
+      <div class="sidebar-footer"><span class="status-dot"></span> Painel editorial <small>Informe67 · Administração</small></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><button id="menu-toggle" class="icon-button" type="button" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">☰</button><span>Painel <span class="divider">/</span> <strong id="breadcrumb">Visão geral</strong></span><div class="account"><span id="avatar" class="avatar"></span><span id="user-name"></span><button id="logout" type="button">Sair</button></div></header>
+      <main class="content" id="content" tabindex="-1">
+        <div class="page-heading"><div><p class="eyebrow">INFORME67 · ADMINISTRAÇÃO</p><h1 id="page-title">Visão geral</h1><p id="page-description" class="muted">Acompanhe o conteúdo e a organização do portal.</p></div><button id="refresh" class="secondary" type="button">↻ Atualizar</button></div>
+        <p id="panel-error" class="error" role="alert"></p>
+        <div id="view" aria-live="polite"></div>
+        <footer class="content-footer">Informe67 <span>Informação que importa.</span></footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

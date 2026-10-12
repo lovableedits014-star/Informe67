@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f7f4">
+    <meta name="description" content="Informe67: notícias de Campo Grande, de Mato Grosso do Sul, do Brasil e do mundo.">
+    <title>Informe67 — Informação que importa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="informe67-api" content="">
+    <script src="public-api.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="topline">
+      <div class="shell topline-inner">
+        <p>A notícia perto de você, sempre.</p>
+        <p id="today"></p>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="shell header-main">
+        <a class="brand" href="#" aria-label="Informe67 — página inicial">
+          <span class="brand-mark">67</span>
+          <span class="brand-name">informe<span>67</span></span>
+        </a>
+        <p class="header-motto">Informação que importa.</p>
+        <form class="search" role="search">
+          <label class="visually-hidden" for="search-input">Buscar notícias</label>
+          <input id="search-input" type="search" placeholder="Buscar notícias..." autocomplete="off">
+          <button type="submit" aria-label="Buscar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+          </button>
+        </form>
+      </div>
+      <nav class="category-nav" aria-label="Categorias de notícias">
+        <div class="shell nav-inner">
+          <button class="nav-link active" type="button" data-filter="all" aria-pressed="true">Todas</button>
+          <button class="nav-link" type="button" data-filter="Campo Grande" aria-pressed="false">Campo Grande</button>
+          <button class="nav-link" type="button" data-filter="Mato Grosso do Sul" aria-pressed="false">Mato Grosso do Sul</button>
+          <button class="nav-link" type="button" data-filter="Brasil" aria-pressed="false">Brasil</button>
+          <button class="nav-link" type="button" data-filter="Mundo" aria-pressed="false">Mundo</button>
+          <button class="nav-link" type="button" data-filter="Esporte" aria-pressed="false">Esporte</button>
+          <button class="nav-link" type="button" data-filter="Cultura" aria-pressed="false">Cultura</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <aside class="shell ad-slot" aria-label="Publicidade">
+        <p class="ad-label">Publicidade</p>
+        <img src="assets/ads/banner-mensal.gif" alt="Anúncio: abrir uma garrafa de água é fácil.">
+      </aside>
+
+      <section class="shell lead-section" aria-labelledby="lead-title">
+        <div class="section-kicker"><span></span> EM DESTAQUE <span class="kicker-line"></span></div>
+        <div class="lead-grid">
+          <article class="lead-story">
+            <a class="lead-image image-link" href="noticia.html" aria-label="Leia a notícia em destaque">
+              <img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1600&q=85" alt="Céu colorido ao entardecer sobre uma cidade" fetchpriority="high">
+              <span class="image-credit">Campo Grande · MS</span>
+            </a>
+            <div class="lead-copy">
+              <p class="eyebrow">CIDADE <span>·</span> CAMPO GRANDE</p>
+              <h1 id="lead-title"><a href="noticia.html">Campo Grande: histórias e mudanças que movimentam a Capital</a></h1>
+              <p class="standfirst">Acompanhe os assuntos que fazem parte do dia a dia de quem vive na Cidade Morena.</p>
+              <a class="read-link" href="noticia.html">Leia a cobertura <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+          <aside class="briefing" aria-labelledby="briefing-title">
+            <div class="briefing-heading">
+              <div>
+                <p class="eyebrow">FIQUE POR DENTRO</p>
+                <h2 id="briefing-title">Em poucas palavras</h2>
+              </div>
+              <span class="live-dot" aria-label="Atualizado"></span>
+            </div>
+            <article class="brief-item">
+              <p class="brief-category">MATO GROSSO DO SUL <span>· 4 MIN</span></p>
+              <h3><a href="#ultimas">O que acompanhar hoje no estado</a></h3>
+            </article>
+            <article class="brief-item">
+              <p class="brief-category">BRASIL <span>· 6 MIN</span></p>
+              <h3><a href="#ultimas">As pautas que estão no centro do debate nacional</a></h3>
+            </article>
+            <article class="brief-item">
+              <p class="brief-category">MUNDO <span>· 8 MIN</span></p>
+              <h3><a href="#ultimas">Notícias internacionais para entender o dia</a></h3>
+            </article>
+            <a class="all-news-link" href="#ultimas">Ver todas as notícias <span aria-hidden="true">→</span></a>
+          </aside>
+        </div>
+      </section>
+
+      <section class="shell latest-section" id="ultimas" aria-labelledby="latest-title">
+        <div class="latest-heading">
+          <div>
+            <p class="section-kicker"><span></span> ACONTECE AGORA</p>
+            <h2 id="latest-title">Últimas notícias</h2>
+          </div>
+          <p class="results-count" id="results-count" aria-live="polite">6 notícias</p>
+        </div>
+        <div class="news-grid" id="news-grid">
+          <article class="news-card" data-category="Campo Grande" data-search="campo grande cidade bairros mobilidade">
+            <a class="card-image image-link" href="noticia.html">
+              <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=900&q=80" alt="Avenida urbana cercada por prédios" loading="lazy">
+              <span class="card-category">Campo Grande</span>
+            </a>
+            <div class="card-copy">
+              <p class="card-meta">CIDADE <span>·</span> 12 OUT, 2026</p>
+              <h3><a href="noticia.html">Campo Grande: histórias e mudanças que movimentam a Capital</a></h3>
+              <p>Um panorama dos assuntos que impactam a rotina dos campo-grandenses.</p>
+              <span class="reading-time">3 min de leitura</span>
+            </div>
+          </article>
+          <article class="news-card" data-category="Mato Grosso do Sul" data-search="mato grosso do sul interior estado desenvolvimento">
+            <a class="card-image image-link" href="#ultimas">
+              <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=900&q=80" alt="Paisagem natural com montanhas e água" loading="lazy">
+              <span class="card-category">Mato Grosso do Sul</span>
+            </a>
+            <div class="card-copy">
+              <p class="card-meta">ESTADO <span>·</span> 12 OUT, 2026</p>
+              <h3><a href="#ultimas">Do interior à Capital: notícias que conectam Mato Grosso do Sul</a></h3>
+              <p>Gente, lugares e iniciativas que ajudam a contar a história do estado.</p>
+              <span class="reading-time">5 min de leitura</span>
+            </div>
+          </article>
+          <article class="news-card" data-category="Brasil" data-search="brasil economia cotidiano brasileiro">
+            <a class="card-image image-link" href="#ultimas">
+              <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=80" alt="Edifícios altos em um centro urbano" loading="lazy">
+              <span class="card-category">Brasil</span>
+            </a>
+            <div class="card-copy">
+              <p class="card-meta">BRASIL <span>·</span> 12 OUT, 2026</p>
+              <h3><a href="#ultimas">O que acontece no país e por que isso importa para você</a></h3>
+              <p>Contexto e informação para acompanhar os principais temas nacionais.</p>
+              <span class="reading-time">4 min de leitura</span>
+            </div>
+          </article>
+          <article class="news-card" data-category="Mundo" data-search="mundo internacional global notícias">
+            <a class="card-image image-link" href="#ultimas">
+              <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=900&q=80" alt="Globo terrestre sobre um mapa" loading="lazy">
+              <span class="card-category">Mundo</span>
+            </a>
+            <div class="card-copy">
+              <p class="card-meta">MUNDO <span>·</span> 12 OUT, 2026</p>
+              <h3><a href="#ultimas">Um olhar sobre os acontecimentos que cruzam fronteiras</a></h3>
+              <p>As notícias internacionais explicadas com clareza e contexto.</p>
+              <span class="reading-time">6 min de leitura</span>
+            </div>
+          </article>
+          <article class="news-card" data-category="Esporte" data-search="esporte futebol esporte sul-mato-grossense">
+            <a class="card-image image-link" href="#ultimas">
+              <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=900&q=80" alt="Jogador de futebol em campo durante uma partida" loading="lazy">
+              <span class="card-category">Esporte</span>
+            </a>
+            <div class="card-copy">
+              <p class="card-meta">ESPORTE <span>·</span> 12 OUT, 2026</p>
+              <h3><a href="#ultimas">Esporte local e nacional: histórias para acompanhar de perto</a></h3>
+              <p>Resultados, bastidores e personagens que fazem o esporte acontecer.</p>
+              <span class="reading-time">3 min de leitura</span>
+            </div>
+          </article>
+          <article class="news-card" data-category="Cultura" data-search="cultura arte música agenda cultural">
+            <a class="card-image image-link" href="#ultimas">
+              <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80" alt="Público reunido em um evento cultural" loading="lazy">
+              <span class="card-category">Cultura</span>
+            </a>
+            <div class="card-copy">
+              <p class="card-meta">CULTURA <span>·</span> 12 OUT, 2026</p>
+              <h3><a href="#ultimas">Arte e cultura em Mato Grosso do Sul: o que vale conhecer</a></h3>
+              <p>Um espaço para as ideias, os artistas e a produção cultural da região.</p>
+              <span class="reading-time">4 min de leitura</span>
+            </div>
+          </article>
+        </div>
+        <p class="empty-state" id="empty-state" hidden>Nenhuma notícia encontrada. Tente outra busca ou categoria.</p>
+      </section>
+
+      <section class="shell category-overview" id="editorias" aria-labelledby="editorias-title" hidden>
+        <div class="latest-heading"><div><p class="section-kicker"><span></span> POR EDITORIA</p><h2 id="editorias-title">Um olhar sobre cada categoria</h2></div></div>
+        <div id="category-highlights" class="category-highlights"></div>
+      </section>
+      <aside class="shell newsletter" aria-labelledby="newsletter-title">
+        <div>
+          <p class="eyebrow">INFORME67 NO SEU DIA</p>
+          <h2 id="newsletter-title">As notícias mais importantes, direto ao ponto.</h2>
+          <p>Estamos preparando uma newsletter para você acompanhar o que importa.</p>
+        </div>
+        <a class="newsletter-link" href="mailto:contato@informe67.com.br?subject=Newsletter%20Informe67">Quero saber mais <span aria-hidden="true">→</span></a>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <a class="brand footer-brand" href="#" aria-label="Informe67 — página inicial">
+          <span class="brand-mark">67</span>
+          <span class="brand-name">informe<span>67</span></span>
+        </a>
+        <p>Notícias de Campo Grande, de Mato Grosso do Sul e do mundo.</p>
+        <span class="demo-note">Conteúdo demonstrativo para apresentação do portal.</span>
+        <span class="copyright">© <span id="year"></span> Informe67</span>
+      </div>
+    </footer>
+  </body>
+</html>
