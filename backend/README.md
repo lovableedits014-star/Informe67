@@ -473,8 +473,34 @@ Uma chamada real exige configurar a chave e o modelo pelo próprio painel.
 
 ## EasyPanel
 
-Implante o serviço do backend a partir de `backend`, configure a porta interna
-3000 e as variáveis/segredos pelo painel. Configure o host interno
+O serviço único entrega o site público em `/`, a página `noticia.html`, os
+arquivos JavaScript/CSS e `assets/`, além de `/admin/`, `/api/` e `/media/`.
+Os arquivos públicos da raiz são empacotados em `backend/public/site` pelo
+script `scripts/site-assets.mjs` durante `npm run build`. Esse diretório é gerado
+e não deve ser versionado. O Fastify serve somente esse pacote; arquivos internos
+do backend, `.env`, backups e uploads não são expostos pelo servidor estático.
+
+No serviço existente do EasyPanel, configure:
+
+- **Caminho de Build:** `/` (raiz do repositório), substituindo `/backend`.
+- **Método:** Dockerfile; **Dockerfile:** `Dockerfile` da raiz.
+- **Porta interna:** `3000`.
+- **Comando de inicialização:** mantenha o padrão do Dockerfile (`npm start`).
+  Se houver um comando explícito, use `npm start` ou `node dist/server.js`.
+- **Build:** o Dockerfile instala e executa `npm run build` em `/build/backend`;
+  não é necessário adicionar outro comando de build no EasyPanel.
+- **Domínio:** aponte o domínio do portal para esse mesmo serviço/porta.
+
+Depois de salvar o Caminho de Build, faça um novo deploy. O contexto precisa
+incluir a raiz: usar `/backend` impediria o Docker de copiar `index.html`,
+`noticia.html`, os scripts, `styles.css` e `assets/`. O antigo Dockerfile em
+`backend` foi movido para a raiz. O runtime continua em `/app` e usa as mesmas
+variáveis e caminhos de armazenamento. Mantenha o volume existente em
+`/app/uploads`; o build não copia nem substitui seu conteúdo. A API do frontend
+implantado usa `location.origin`, inclusive com HTTPS e domínio personalizado;
+o endereço `127.0.0.1:3000` fica restrito à prévia local em arquivo/porta 5500.
+
+Preserve as variáveis/segredos existentes. Configure o host interno
 `n8n_postgres` somente se os serviços compartilharem a rede privada. Migrações
 devem ser geradas, revisadas, versionadas, respaldadas e aplicadas manualmente
 por uma pessoa autorizada; não as inclua no comando de inicialização ou deploy.

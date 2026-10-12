@@ -6,6 +6,7 @@ backend/node_modules/
 backend/dist/
 backend/uploads/
 backend/public/admin/vendor/
+backend/public/site/
 backend/backups/
 backend/.private/
 *.dump

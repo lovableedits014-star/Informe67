@@ -7,6 +7,7 @@ import { createNewsStore, type NewsStore } from "./news/store.js";
 import { publicNewsRoutes, startNewsScheduler } from "./news/routes.js";
 import { createBannerStore, type BannerStore } from './admin/banners.js';
 import {createRewriteService,type RewriteService} from './rewrite/service.js';
+import { publicSiteRoutes } from './public/site.js';
 
 type HealthDatabase = {
   query: (text: string) => Promise<unknown>;
@@ -59,6 +60,7 @@ export function buildApp(database: HealthDatabase = createDatabasePool(), option
     bannerStore,
     rewriteService,
   });
+  app.register(publicSiteRoutes);
   if (newsStore) {
     publicNewsRoutes(app, newsStore, bannerStore);
     if (options.newsScheduler) startNewsScheduler(app, newsStore);

@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+**/node_modules
+backend/dist
+backend/test
+backend/backups
+backend/uploads
+backend/.private
+backend/public/site
+backend/public/admin/vendor
+**/*.log

@@ -1,8 +1,8 @@
 "use strict";
-// Production can set the API origin in the informe67-api meta tag.
+// The deployed portal uses its own origin. Only standalone local previews use port 3000.
 const configuredApi = document.querySelector('meta[name="informe67-api"]')?.content.trim();
 const localSite = ["localhost", "127.0.0.1"].includes(location.hostname) || location.protocol === "file:";
-let apiBase = configuredApi || (localSite && location.port !== "3000" ? "http://127.0.0.1:3000" : location.origin);
+let apiBase = localSite ? configuredApi || (location.protocol === 'file:' || location.port === '5500' ? "http://127.0.0.1:3000" : location.origin) : location.origin;
 window.Informe67API = {
   get base() { return apiBase; },
   async get(path) {
