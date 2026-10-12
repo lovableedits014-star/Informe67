@@ -1,14 +1,15 @@
 "use strict";
 window.RewriteModule={mount({root,user,api,openNews,back}){
-  let disposed=false,timer,busy=false,job,options,editing=false,revision=0;
+  let disposed=false,timer,busy=false,job,options,editing=false,revision=0,popup;
+  function preview(){if(!popup&&window.RewritePreview)popup=window.RewritePreview.create({user,api,categories:options.categories,openEditor:openNews,regenerate:async()=>{popup.loading();job=await api(`news/rewrite/${job.id}/generate`,{method:'POST',body:JSON.stringify({categoryId:job.categoryId,regenerate:true})});await show();}});return popup;}
   const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
   const button=(text,handler,cls='secondary')=>{const b=el('button',text,cls);b.type='button';b.onclick=handler;return b;};
   const states={queued_capture:'Aguardando captura',capturing:'Buscando matéria e imagem…',captured:'Prévia pronta para conferir',queued_generate:'Aguardando geração',generating:'Reescrevendo e salvando rascunho…',ready:'Rascunho pronto',error:'Precisa de atenção'};
   const writable=['news.create','news.upload'].every(p=>user.permissions.includes(p));
   const pending=j=>['queued_capture','capturing','queued_generate','generating'].includes(j.state);
-  function notice(message,error=false){const n=root.querySelector('#rewrite-notice');if(n){n.textContent=message;n.className=error?'error':'save-status';}}
+  function notice(message,error=false){for(const n of root.querySelectorAll('#rewrite-notice,[data-rewrite-feedback]')){n.textContent=message;n.className=(n.hasAttribute('data-rewrite-feedback')?'rewrite-feedback ':'')+(error?'error':'save-status');n.setAttribute('role',error?'alert':'status');n.hidden=!message;}}
   function canLeave(){return!editing||window.confirm('Há alterações na prévia que ainda não foram salvas. Sair sem salvar?');}
-  async function action(fn){if(busy)return;busy=true;try{await fn();}catch(e){notice(e.message,true);}finally{busy=false;}}
+  async function action(fn){if(busy)return;busy=true;root.setAttribute('aria-busy','true');try{await fn();}catch(e){notice(e.message,true);popup?.error(e.message);}finally{busy=false;root.setAttribute('aria-busy','false');}}
   async function home(){clearTimeout(timer);job=undefined;editing=false;const seq=++revision;
     root.replaceChildren(el('p','Carregando reescritas…','muted'));
     try{const [history,choices]=await Promise.all([api('news/rewrite'),api('news/options')]);if(disposed||seq!==revision)return;options=choices;
@@ -35,7 +36,7 @@ window.RewriteModule={mount({root,user,api,openNews,back}){
       const details=el('details'),summary=el('summary','Texto extraído');details.append(summary,el('p',job.source.text,'rewrite-source-text'));body.append(details);
     }
     if(pending(job))body.append(el('p','O processamento continua se você sair desta tela. Acompanhe pelo histórico.','muted'));
-    else if(job.newsId){body.append(button('Revisar e publicar no editor',()=>openNews(job.newsId),'primary'));
+    else if(job.newsId){body.append(button('Ver matéria reescrita',()=>preview()?.show(job),'primary'),button('Revisar e publicar no editor',()=>openNews(job.newsId),'secondary'));
       if(job.imageError&&writable)body.append(button('Tentar recuperar a imagem',()=>action(async()=>{notice('Recuperando imagem…');job=await api(`news/rewrite/${job.id}/image`,{method:'POST'});show();})));
       if(writable)body.append(button('Gerar nova versão da origem',()=>{if(window.confirm('Criar uma nova versão como outra matéria?'))action(async()=>{job=(await api('news/rewrite',{method:'POST',body:JSON.stringify({url:job.url,newVersion:true})})).job;show();});}));
       if(job.result?.warnings?.length){body.append(el('h3','Pontos para conferir'));for(const warning of job.result.warnings)body.append(el('p',warning,'muted'));}
@@ -44,11 +45,17 @@ window.RewriteModule={mount({root,user,api,openNews,back}){
       form.innerHTML='<label>Título original<input name="title" maxlength="240" required></label><label>Texto completo<textarea name="text" rows="12" minlength="150" maxlength="60000" required></textarea></label><label>URL da imagem (opcional)<input name="imageUrl" type="url" maxlength="2048"></label><label>Crédito da imagem disponível<input name="imageCredit" maxlength="300"></label><button type="submit" class="secondary">Salvar prévia</button>';
       for(const name of ['title','text','imageUrl','imageCredit'])form.elements.namedItem(name).value=job.source?.[name]||'';
       form.oninput=()=>{editing=true;};form.onsubmit=event=>{event.preventDefault();if(!form.reportValidity())return;action(async()=>{const data={};for(const name of ['title','text','imageUrl','imageCredit'])data[name]=form.elements.namedItem(name).value;job=await api(`news/rewrite/${job.id}/source`,{method:'PUT',body:JSON.stringify(data)});editing=false;show();notice('Prévia salva. Escolha a categoria e gere o rascunho.');});};manual.append(form);body.append(manual);
-      if(job.source){const form=el('form',undefined,'news-controls'),label=el('label','Categoria do Informe67'),select=el('select');select.name='categoryId';select.required=true;const placeholder=el('option','Selecione a categoria');placeholder.value='';select.append(placeholder);for(const category of options.categories){const option=el('option',category.name);option.value=category.id;select.append(option);}select.value=job.categoryId||'';label.append(select);const submit=el('button',job.result?'Salvar resultado como rascunho':'Reescrever com IA','primary');submit.type='submit';form.append(label,submit);form.onsubmit=event=>{event.preventDefault();if(editing){notice('Salve as alterações da prévia antes de gerar.',true);return;}if(!form.reportValidity())return;action(async()=>{job=await api(`news/rewrite/${job.id}/generate`,{method:'POST',body:JSON.stringify({categoryId:select.value})});show();});};body.append(form);
+      if(job.source){const form=el('form',undefined,'news-controls'),label=el('label','Categoria do Informe67'),select=el('select');select.name='categoryId';select.required=true;const placeholder=el('option','Selecione a categoria');placeholder.value='';select.append(placeholder);for(const category of options.categories){const option=el('option',category.name);option.value=category.id;select.append(option);}select.value=job.categoryId||'';label.append(select);const submit=el('button',job.result?'Salvar resultado como rascunho':'Reescrever com IA','primary');submit.type='submit';form.append(label,submit);form.onsubmit=event=>{event.preventDefault();if(busy)return;if(editing){notice('Salve as alterações da prévia antes de gerar.',true);return;}if(!form.reportValidity())return;action(async()=>{const original=submit.textContent;submit.disabled=true;select.disabled=true;submit.textContent='Enviando para IA…';notice('Solicitando a reescrita. Aguarde…');job.categoryId=select.value;preview()?.loading();try{job=await api(`news/rewrite/${job.id}/generate`,{method:'POST',body:JSON.stringify({categoryId:select.value})});await show();}finally{submit.disabled=false;select.disabled=false;submit.textContent=original;}});};body.append(form);
         if(job.source.imageUrl&&!job.image)body.append(button('Recuperar imagem da prévia',()=>action(async()=>{notice('Recuperando imagem…');job=await api(`news/rewrite/${job.id}/image`,{method:'POST'});show();})));
       }
     }
-    card.append(body);root.replaceChildren(header,card);if(pending(job))timer=setTimeout(poll,2000);
+    const feedback=el('p',undefined,'rewrite-feedback save-status');feedback.setAttribute('data-rewrite-feedback','');feedback.role='status';feedback.hidden=true;body.append(feedback);
+    card.append(body);root.replaceChildren(header,card);
+    if(job.error)notice(job.error,true);
+    else if(pending(job))notice(states[job.state]+' O processamento continua se você sair desta tela.');
+    else if(job.newsId)notice('Rascunho salvo. Abra o editor para revisar e publicar.');
+    if(pending(job))timer=setTimeout(poll,2000);
+    if(popup||job.state==='ready')await preview()?.show(job);
   }
-  home();return{canLeave,hasChanges:()=>editing,dispose(){disposed=true;clearTimeout(timer);revision++;}};
+  home();return{canLeave,hasChanges:()=>editing,dispose(){disposed=true;clearTimeout(timer);popup?.dispose();revision++;}};
 }};

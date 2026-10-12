@@ -38,7 +38,7 @@ export async function adminRoutes(app: FastifyInstance, options: AdminOptions) {
     reply.header("X-Content-Type-Options", "nosniff");
     reply.header("Referrer-Policy", "no-referrer");
     reply.header("X-Frame-Options", "DENY");
-    reply.header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    reply.header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     return payload;
   });
   app.setErrorHandler((error, request, reply) => {

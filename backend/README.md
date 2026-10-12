@@ -405,12 +405,13 @@ sem revelar detalhes do banco. Essa verificação não modifica o schema.
 
 Em **Configurações**, o superadministrador escolhe Groq, Gemini ou Claude, informa o
 identificador do modelo disponível na sua conta e sua chave de API. A chave é
-criptografada com AES-256-GCM; a API retorna apenas `hasKey`. Orientações, limite
-diário (1–500 gerações) e tamanho máximo da fonte (1.000–60.000 caracteres) são
-configuráveis. O teste de conexão chama o provedor e pode consumir saldo.
+criptografada com AES-256-GCM; a API retorna apenas `hasKey`. Orientações e tamanho
+máximo da fonte (1.000–60.000 caracteres) são configuráveis. Não há limite interno
+de tentativas ou de reescritas diárias. O teste de conexão chama o provedor e pode
+consumir saldo. Os limites de uso do próprio provedor continuam aplicáveis.
 
 Groq é a opção inicial para novas configurações, com o modelo sugerido
-`llama-3.3-70b-versatile`. Informe sua própria chave Groq no painel e salve antes
+`openai/gpt-oss-120b`. Informe sua própria chave Groq no painel e salve antes
 de testar. Configurações existentes de outros provedores são preservadas.
 O adaptador usa JSON Object Mode, no máximo 4.096 tokens de saída e registra os
 tokens de entrada e saída informados pela API. Os limites do plano gratuito
@@ -419,8 +420,14 @@ orientam a reduzir a fonte. Não há repetição automática nem troca de proved
 Modelos com identificador composto, como `familia/modelo`, são aceitos na Groq.
 
 Em **Notícias → Reescrita com IA**, cole o link, confira o texto e a imagem
-recuperados, escolha uma categoria e gere o rascunho. Use **Revisar e publicar no
-editor** para editar, publicar ou agendar pelo fluxo de Notícias existente. Caso
+recuperados, escolha uma categoria e gere o rascunho. Uma popup acompanha a geração
+e exibe a matéria reescrita, com capa, categoria, texto formatado e créditos. A
+prévia usa o CSS e as fontes da página pública de matérias, em um iframe sem scripts.
+Os botões **Publicar agora**, **Agendar publicação** e **Reescrever novamente**
+operam sobre esse mesmo rascunho. A publicação reutiliza as validações e permissões
+do módulo de Notícias. A regeneração atualiza o mesmo rascunho, conserva suas
+imagens e usa a versão anterior para solicitar uma nova redação. Publicações e
+agendamentos existentes não são sobrescritos pela regeneração. Caso
 a extração seja bloqueada ou incompleta, use **Colar texto manualmente**. Imagens
 JPEG, PNG e WebP de até 5 MB são baixadas, validadas e salvas no armazenamento
 local; imagens ausentes não impedem o salvamento do texto. A recuperação de uma
@@ -434,8 +441,11 @@ público. O worker é ativado no servidor junto ao scheduler editorial. Uma tare
 interrompida é liberada para tentativa manual após dez minutos; não há repetição
 automática de chamadas pagas. Resultados já persistidos são reutilizados ao
 repetir o salvamento. URLs normalizadas e redirecionamentos ajudam a identificar
-duplicações; outra versão exige uma ação explícita. Cada tarefa permite até três
-tentativas de geração por dia, dentro do limite global configurado.
+duplicações; outra matéria exige uma ação explícita. Reescritas sucessivas do
+rascunho não criam notícias duplicadas. O campo legado `dailyLimit` permanece
+compatível com configurações antigas, mas não restringe a geração. O backend
+rejeita respostas iguais ou com alta repetição de trechos do original; em caso
+de falha não substitui a reescrita pela matéria original nem publica conteúdo.
 
 Origem, autor e data original ficam na procedência; a nova notícia recebe a data
 de publicação do Informe67. Créditos com link são montados pelo backend e

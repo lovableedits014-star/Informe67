@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { createHash } from 'node:crypto';
 import { buildApp } from "../src/app.js";
 import { hashPassword, verifyPassword } from "../src/admin/password.js";
 import { type AdminStore, type AdminUser } from "../src/admin/store.js";
@@ -39,6 +40,12 @@ test("admin assets are isolated, include security headers and public health rema
   assert.match(String(page.headers["content-security-policy"]), /frame-ancestors 'none'/);
   assert.equal(page.headers["cache-control"], "no-store");
   assert.equal((await app.inject("/admin/admin.js")).statusCode, 200);
+  const versioned = page.body.match(/src="(\/admin\/ai-settings\.js\?v=([a-f0-9]{12}))"/);
+  assert.ok(versioned, 'Settings script must have an asset version');
+  const settings = await app.inject(versioned[1]);
+  assert.equal(settings.statusCode, 200);assert.equal(settings.headers['cache-control'], 'no-store');
+  assert.match(settings.body, /value="groq"/);
+  assert.equal(createHash('sha256').update(settings.body).digest('hex').slice(0,12), versioned[2]);
   assert.equal((await app.inject("/admin/.env")).statusCode, 404);
   assert.equal((await app.inject("/api/health")).statusCode, 200);
 });

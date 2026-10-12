@@ -1,12 +1,13 @@
-import { and, eq, sql, count, desc, asc, ilike, lte } from "drizzle-orm";
+import { and, eq, sql, count, desc, asc, ilike, lte, getTableColumns } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
 import * as s from "../db/schema.js";
 import { assertNewsPermission, NewsError, slugify, sanitizeContent, type NewsInput } from "./validation.js";
 import { assertImagesExist } from "./media.js";
 import { withCredits, type Source } from '../rewrite/source.js';
+import {assertRewritten} from '../rewrite/ai.js';
 
-export type NewsRecord = typeof s.news.$inferSelect & { tags: string[]; images: typeof s.newsImages.$inferSelect[] };
+export type NewsRecord = typeof s.news.$inferSelect & { tags: string[]; images: typeof s.newsImages.$inferSelect[];authorName?:string;categoryName?:string|null };
 export type ListOptions = { page: number; search: string; status?: typeof s.news.$inferSelect.status };
 export type BrowseOptions = { page: number; pageSize: number; category?: string; search: string };
 export interface NewsStore {
@@ -24,7 +25,7 @@ export function createNewsStore(pool: Pool, checkImages = assertImagesExist): Ne
   async function assertTarget() { const result = await db.execute(sql`SELECT current_database() AS database`); if (result.rows[0]?.database !== "informe67") throw new Error("Destino inesperado."); }
   async function get(id: string): Promise<NewsRecord | undefined> {
     await assertTarget();
-    const [news] = await db.select().from(s.news).where(eq(s.news.id, id));
+    const [news] = await db.select({...getTableColumns(s.news),authorName:s.users.displayName,categoryName:s.categories.name}).from(s.news).innerJoin(s.users,eq(s.news.authorId,s.users.id)).leftJoin(s.categories,eq(s.news.categoryId,s.categories.id)).where(eq(s.news.id, id));
     if (!news) return undefined;
     const tags = await db.select({ name: s.tags.name }).from(s.newsTags).innerJoin(s.tags, eq(s.newsTags.tagId, s.tags.id)).where(eq(s.newsTags.newsId, id));
     const images = await db.select().from(s.newsImages).where(eq(s.newsImages.newsId, id)).orderBy(s.newsImages.sortOrder);
@@ -56,6 +57,7 @@ export function createNewsStore(pool: Pool, checkImages = assertImagesExist): Ne
           const { tags, images, version: _version, ...fields } = input;
           const persisted = old ? (await tx.select({value:s.portalSettings.value}).from(s.portalSettings).where(eq(s.portalSettings.key,`rewrite.news.${old.id}`)))[0]?.value as {source:Source;jobId:string}|undefined : undefined;
           const provenance = persisted || origin;
+          if(provenance&&['published','scheduled'].includes(fields.status))assertRewritten({title:fields.title,summary:fields.summary||'',content:fields.content,tags:[],seoTitle:'',seoDescription:'',warnings:[]},provenance.source);
           if(provenance)fields.content=sanitizeContent(withCredits(fields.content,provenance.source));
           const updatedAt = new Date(Math.max(Date.now(), (old?.updatedAt.getTime() ?? 0) + 1));
           const publishedAt = input.status === "published" ? old?.publishedAt ?? updatedAt : old?.publishedAt ?? null;
