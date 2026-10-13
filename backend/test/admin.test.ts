@@ -8,7 +8,7 @@ import { type AdminStore, type AdminUser } from "../src/admin/store.js";
 const origin = "http://localhost:3000";
 const password = "test-only-long-password";
 const hash = await hashPassword(password);
-function fixture(options: { secureCookies?: boolean; sessionTtlMs?: number } = {}) {
+function fixture(options: { adminOrigin?: string; secureCookies?: boolean; sessionTtlMs?: number } = {}) {
   const user: AdminUser = { id: "1", email: "editor@example.test", displayName: "Editor", passwordHash: hash, isActive: true, permissions: ["admin.access", "news.read"] };
   const audits: string[] = [], calls: string[] = [];
   const store: AdminStore = {
@@ -59,7 +59,7 @@ test("every admin data route requires a session, forged cookies are rejected", a
   assert.deepEqual(calls, []);
 });
 
-test("login requires exact origin and valid credentials; failures do not reveal account status", async t => {
+test("login requires an authorized origin and valid credentials; failures do not reveal account status", async t => {
   const { app, user, login } = fixture(); t.after(() => app.close());
   const payload = { email: user.email, password };
   assert.equal((await app.inject({ method: "POST", url: "/api/admin/login", payload })).statusCode, 403);
@@ -70,6 +70,34 @@ test("login requires exact origin and valid credentials; failures do not reveal 
   assert.equal(unknown.statusCode, 401); assert.equal(inactive.statusCode, 401);
   assert.equal(unknown.body, inactive.body);
   assert.equal(inactive.headers["set-cookie"], undefined);
+});
+
+test("login accepts the HTTPS origin matching the public host behind a proxy", async t => {
+  const { app, user } = fixture({ adminOrigin: "https://old-deployment.example.test", secureCookies: true });
+  t.after(() => app.close());
+  const response = await app.inject({
+    method: "POST",
+    url: "/api/admin/login",
+    headers: { origin: "https://informe67noticias.com.br", host: "informe67noticias.com.br" },
+    payload: { email: user.email, password },
+  });
+  assert.equal(response.statusCode, 200);
+
+  const attacker = await app.inject({
+    method: "POST",
+    url: "/api/admin/login",
+    headers: { origin: "https://attacker.test", host: "informe67noticias.com.br" },
+    payload: { email: user.email, password },
+  });
+  assert.equal(attacker.statusCode, 403);
+
+  const insecure = await app.inject({
+    method: "POST",
+    url: "/api/admin/login",
+    headers: { origin: "http://informe67noticias.com.br", host: "informe67noticias.com.br" },
+    payload: { email: user.email, password },
+  });
+  assert.equal(insecure.statusCode, 403);
 });
 
 test("session login, RBAC, CSRF logout and logout revocation", async t => {

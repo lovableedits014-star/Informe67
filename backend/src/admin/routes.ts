@@ -54,7 +54,18 @@ export async function adminRoutes(app: FastifyInstance, options: AdminOptions) {
   app.get("/admin", async (_request, reply) => reply.redirect("/admin/"));
 
   function sameOrigin(request: FastifyRequest, reply: FastifyReply) {
-    if (request.headers.origin !== options.origin || request.headers["sec-fetch-site"] === "cross-site") {
+    const requestOrigin = request.headers.origin;
+    let matchesPublicHost = false;
+    if (requestOrigin && request.headers.host) {
+      try {
+        const parsedOrigin = new URL(requestOrigin);
+        matchesPublicHost = parsedOrigin.host === request.headers.host
+          && (options.secure ? parsedOrigin.protocol === "https:" : ["http:", "https:"].includes(parsedOrigin.protocol));
+      } catch {
+        matchesPublicHost = false;
+      }
+    }
+    if ((requestOrigin !== options.origin && !matchesPublicHost) || request.headers["sec-fetch-site"] === "cross-site") {
       reply.code(403).send({ message: "Origem não autorizada." });
       return false;
     }
