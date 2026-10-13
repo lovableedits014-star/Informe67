@@ -454,10 +454,12 @@ da nova publicação. O operador precisa conferir fatos e datas antes de publica
 Créditos fotográficos encontrados são preservados; a indicação da fonte da imagem
 não equivale a atribuir sua autoria nem a obter autorização de reprodução.
 
-Na implantação, preserve `/app/.private` em um volume privado ou configure
-`AI_ENCRYPTION_KEY` como segredo de 64 caracteres hexadecimais. Preserve também
-`/app/uploads`. Não versionar `.private`, `.env` ou chaves de API. Se a chave de
-criptografia for perdida, reconfigure a chave do provedor no painel.
+Na implantação, a chave local de criptografia fica em
+`/app/uploads/.private/ai.key`, dentro do mesmo volume persistente das imagens.
+Como alternativa, configure `AI_ENCRYPTION_KEY` como segredo de 64 caracteres
+hexadecimais ou use `AI_SECRET_DIR` para outro volume privado persistente. Não
+versionar `.private`, `.env` ou chaves de API. Se a chave de criptografia for
+perdida, reconfigure a chave do provedor no painel.
 
 Os adaptadores usam as APIs oficiais de
 [Groq](https://console.groq.com/docs/api-reference),

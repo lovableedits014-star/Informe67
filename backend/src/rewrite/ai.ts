@@ -12,7 +12,9 @@ let keyPromise: Promise<Buffer> | undefined;
 async function encryptionKey() {
   if (!keyPromise) keyPromise=(async()=>{
     if(process.env.AI_ENCRYPTION_KEY){if(!/^[a-f0-9]{64}$/i.test(process.env.AI_ENCRYPTION_KEY))throw new NewsError(503,'AI_ENCRYPTION_KEY inválida no servidor.');return Buffer.from(process.env.AI_ENCRYPTION_KEY,'hex');}
-    const directory=resolve(process.env.AI_SECRET_DIR||fileURLToPath(new URL('../../.private/',import.meta.url))),file=resolve(directory,'ai.key');
+    const bundledDirectory=fileURLToPath(new URL('../../.private/',import.meta.url));
+    const persistentDirectory=process.env.NODE_ENV==='production'?'/app/uploads/.private':bundledDirectory;
+    const directory=resolve(process.env.AI_SECRET_DIR||persistentDirectory),file=resolve(directory,'ai.key');
     await mkdir(directory,{recursive:true});try{await writeFile(file,randomBytes(32),{flag:'wx',mode:0o600});}catch(e){if((e as NodeJS.ErrnoException).code!=='EEXIST')throw e;}
     const key=await readFile(file);if(key.length!==32)throw new NewsError(503,'Chave de proteção da IA inválida.');return key;
   })().catch(error=>{keyPromise=undefined;throw error;});

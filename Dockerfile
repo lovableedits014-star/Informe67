@@ -20,7 +20,7 @@ COPY --from=build --chown=node:node /build/backend/package.json ./package.json
 COPY --from=build --chown=node:node /build/backend/node_modules ./node_modules
 COPY --from=build --chown=node:node /build/backend/dist ./dist
 COPY --from=build --chown=node:node /build/backend/public ./public
-RUN mkdir -p /app/uploads/news /app/uploads/banners /app/.private && chown -R node:node /app/uploads /app/.private
+RUN mkdir -p /app/uploads/news /app/uploads/banners /app/uploads/.private && chown -R node:node /app/uploads
 USER node
 EXPOSE 3000
 CMD ["npm", "start"]
