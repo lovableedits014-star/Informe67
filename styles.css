@@ -1,18 +1,23 @@
 :root {
   color-scheme: light;
-  --ink: #202521;
+  --ink: #162b40;
   --muted: #737974;
   --paper: #f8f7f4;
   --white: #fff;
   --line: #e7e5df;
-  --accent: #d44636;
-  --accent-dark: #b63528;
+  --accent: #196b59;
+  --accent-dark: #124e42;
+  --brand-gradient: linear-gradient(90deg, #cadc43, #45b76c 48%, #14a7c2);
   --serif: "Playfair Display", Georgia, serif;
   --sans: "DM Sans", Arial, sans-serif;
 }
 
 * {
   box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 html {
@@ -88,6 +93,17 @@ input {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -1px;
+}
+
+.brand-logo {
+  display: block;
+  width: clamp(156px, 22vw, 230px);
+  max-width: 100%;
+  height: auto;
+}
+
+.footer-brand .brand-logo {
+  width: 180px;
 }
 
 .brand-name {
@@ -190,7 +206,7 @@ input {
   bottom: -1px;
   left: 0;
   height: 2px;
-  background: var(--accent);
+  background: var(--brand-gradient);
   content: "";
   opacity: 0;
 }
@@ -1204,13 +1220,13 @@ input {
 }
 
 :root {
-  --ink: #202923;
-  --muted: #707972;
-  --paper: #f7f6f2;
+  --ink: #162b40;
+  --muted: #637580;
+  --paper: #f7f9f8;
   --white: #fffefa;
   --line: #e8e6df;
-  --accent: #bd4938;
-  --accent-dark: #983b2d;
+  --accent: #196b59;
+  --accent-dark: #124e42;
 }
 
 html {
@@ -1219,27 +1235,74 @@ html {
 
 body {
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  background: var(--paper);
+}
+
+/* Fixed decorative layers keep movement independent of text and scrolling. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::before {
+  inset: -8%;
   background:
-    radial-gradient(ellipse at 8% 8%, rgb(212 176 126 / 10%), transparent 34%),
-    radial-gradient(ellipse at 92% 38%, rgb(169 190 168 / 9%), transparent 38%),
-    var(--paper);
-  background-attachment: fixed;
-  background-size: 115% 115%, 120% 120%, auto;
-  animation: ambient-shift 34s ease-in-out infinite alternate;
+    radial-gradient(ellipse at 12% 18%, rgb(119 145 149 / 11%), transparent 48%),
+    radial-gradient(ellipse at 88% 44%, rgb(151 170 159 / 10%), transparent 48%),
+    radial-gradient(ellipse at 48% 90%, rgb(173 165 151 / 8%), transparent 46%);
+  animation: ambient-shift 38s ease-in-out infinite alternate;
+}
+
+body::after {
+  inset: 0;
+  background-image:
+    linear-gradient(115deg,
+      transparent 35%,
+      rgb(255 169 34 / 65%) 42%,
+      rgb(116 207 62 / 60%) 48%,
+      rgb(12 182 198 / 65%) 54%,
+      rgb(42 128 212 / 55%) 59%,
+      transparent 66%),
+    linear-gradient(rgb(22 43 64 / 3%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(22 43 64 / 3%) 1px, transparent 1px);
+  background-size: 260% 260%, 88px 88px, 88px 88px;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 22%, transparent 90%),
+    repeating-linear-gradient(#000 0 2px, transparent 2px 88px),
+    repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 88px);
+  mask-composite: intersect, add;
+  animation: grid-light-travel 18s ease-in-out infinite alternate;
+}
+
+@keyframes grid-light-travel {
+  from {
+    background-position: 140% 100%, 0 0, 0 0;
+  }
+
+  to {
+    background-position: -40% 0%, 0 0, 0 0;
+  }
 }
 
 @keyframes ambient-shift {
   from {
-    background-position: 0% 0%, 100% 15%, 0 0;
+    transform: translate3d(-2%, -1%, 0) scale(1);
+    opacity: .7;
   }
 
   to {
-    background-position: 16% 12%, 82% 35%, 0 0;
+    transform: translate3d(2%, 2%, 0) scale(1.04);
+    opacity: 1;
   }
 }
 
 ::selection {
-  background: #bd49382a;
+  background: #45b76c26;
   color: var(--ink);
 }
 
@@ -1262,7 +1325,7 @@ body {
   position: sticky;
   z-index: 10;
   top: 0;
-  background: rgb(248 247 243 / 91%);
+  background: rgb(247 249 248 / 95%);
   box-shadow: 0 8px 24px rgb(32 41 35 / 4%);
   backdrop-filter: blur(16px);
 }
@@ -1272,7 +1335,7 @@ body {
 }
 
 .brand-mark {
-  box-shadow: 0 5px 14px rgb(189 73 56 / 21%);
+  box-shadow: 0 5px 14px rgb(25 107 89 / 16%);
 }
 
 .brand-name {
@@ -1326,6 +1389,10 @@ body {
   grid-template-columns: minmax(0, 1.78fr) minmax(280px, 0.82fr);
   gap: 32px;
   margin-top: 20px;
+}
+
+.lead-grid > * {
+  min-width: 0;
 }
 
 .lead-story {
@@ -1465,8 +1532,17 @@ body {
   border: 1px solid rgb(32 41 35 / 6%);
   border-radius: 16px;
   background:
-    radial-gradient(ellipse at 88% 0%, rgb(189 73 56 / 9%), transparent 38%),
-    #efeee8;
+    radial-gradient(ellipse at 88% 0%, rgb(20 167 194 / 6%), transparent 38%),
+    #f0f5f2;
+}
+
+.newsletter::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--brand-gradient);
+  opacity: .65;
 }
 
 .newsletter h2 {
@@ -1481,7 +1557,7 @@ body {
 
 .newsletter-link {
   border-radius: 5px;
-  box-shadow: 0 7px 18px rgb(189 73 56 / 17%);
+  box-shadow: 0 7px 18px rgb(25 107 89 / 12%);
   transition: background 160ms ease, transform 160ms ease;
 }
 
@@ -1509,9 +1585,9 @@ body {
 .article-category {
   width: fit-content;
   padding: 8px 11px;
-  border: 1px solid rgb(189 73 56 / 13%);
+  border: 1px solid rgb(25 107 89 / 13%);
   border-radius: 4px;
-  background: rgb(189 73 56 / 5%);
+  background: rgb(25 107 89 / 5%);
   font-size: 9px;
 }
 
@@ -1633,7 +1709,7 @@ body {
   border: 1px solid rgb(32 41 35 / 6%);
   border-radius: 14px;
   background:
-    radial-gradient(ellipse at 90% 5%, rgb(189 73 56 / 9%), transparent 38%),
+    radial-gradient(ellipse at 90% 5%, rgb(20 167 194 / 6%), transparent 38%),
     #efeee8;
 }
 
@@ -1665,6 +1741,7 @@ body {
   }
 
   .lead-grid {
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
 
@@ -1857,9 +1934,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body {
+  body::before,
+  body::after {
     animation: none;
-    background-position: 0 0;
+    transform: none;
   }
 
   .news-card,

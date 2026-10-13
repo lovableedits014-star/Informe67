@@ -94,7 +94,9 @@ test("a failed load can be retried by category and does not masquerade as zero n
     w.eval(read("../../script.js")); await settle();
     assert.equal(w.document.querySelector("#results-count")!.textContent, "Notícias indisponíveis");
     assert.equal(w.document.querySelector("#empty-state button")!.textContent, "Tentar novamente");
-    w.document.querySelector<HTMLButtonElement>('[data-filter="Campo Grande"]')!.click(); await settle();
+    assert.equal(w.document.querySelector('[data-filter="Campo Grande"]'), null);
+    w.document.querySelector<HTMLButtonElement>('#empty-state button')!.click(); await settle();
+    w.document.querySelector<HTMLAnchorElement>('[data-filter="Campo Grande"]')!.click(); await settle();
     assert.equal(w.document.querySelector("#results-count")!.textContent, "1 de 1 notícia");
     assert.equal(w.document.querySelectorAll("#news-grid .news-card:not([hidden])").length, 1);
     assert.equal(w.document.querySelector<HTMLElement>("#empty-state")!.hidden, true);

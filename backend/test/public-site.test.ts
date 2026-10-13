@@ -54,3 +54,29 @@ test('deployed frontend resolves API and media through its own HTTPS domain even
     try{w.eval(readFileSync(new URL('../../public-api.js',import.meta.url),'utf8'));await(w as any).Informe67API.get('/api/news');assert.equal(requested,new URL('/api/news',url).href);assert.equal((w as any).Informe67API.image('/media/news/test.webp'),new URL('/media/news/test.webp',url).href);}finally{w.close();}
   }
 });
+
+test('homepage never displays demo stories before a delayed API response, then reveals real news', async () => {
+  const dom = new JSDOM(readFileSync(new URL('../../index.html', import.meta.url), 'utf8'), { url: 'https://informe67.example/', runScripts: 'outside-only' });
+  const w = dom.window;
+  let deliver!: (value: unknown) => void;
+  (w as any).Informe67API = { get: () => new Promise(resolve => { deliver = resolve; }), image: (path: string) => path, article: (slug: string) => `noticia.html?slug=${slug}` };
+  try {
+    assert.equal((w.document.querySelector('.lead-section') as HTMLElement).hidden, true);
+    assert.equal((w.document.querySelector('main > .ad-slot') as HTMLElement).hidden, true);
+    assert.equal(w.document.querySelectorAll('#news-grid .news-card, .brief-item').length, 0);
+    w.eval(readFileSync(new URL('../../script.js', import.meta.url), 'utf8'));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    assert.equal((w.document.querySelector('.lead-section') as HTMLElement).hidden, true);
+    assert.equal(w.document.querySelector('#news-grid')!.getAttribute('aria-busy'), 'true');
+    const item = { id: 'real', slug: 'materia-real', title: 'Matéria real publicada', publishedAt: '2026-10-12T12:00:00Z', categoryName: 'Capital', coverUrl: '/media/news/real.webp' };
+    deliver({ items: [item], featured: [], categories: [], total: 1, page: 1, pageSize: 6 });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal((w.document.querySelector('.lead-section') as HTMLElement).hidden, false);
+    assert.equal(w.document.querySelector('#lead-title a')!.textContent, item.title);
+    assert.equal(w.document.querySelector('#news-grid h3')!.textContent, item.title);
+    assert.equal(w.document.querySelector('#news-grid')!.getAttribute('aria-busy'), 'false');
+    const article = new JSDOM(readFileSync(new URL('../../noticia.html', import.meta.url), 'utf8'));
+    assert.equal((article.window.document.querySelector('.article') as HTMLElement).hidden, true);
+    article.window.close();
+  } finally { w.close(); }
+});

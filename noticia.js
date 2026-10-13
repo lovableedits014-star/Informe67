@@ -43,7 +43,12 @@ shareButton.addEventListener("click", async () => {
 
 async function loadArticle() {
   const slug = new URLSearchParams(location.search).get("slug");
-  if (!slug) return;
+  if (!slug) {
+    const status = document.createElement("p"); status.className = "empty-state";
+    status.textContent = "Selecione uma notícia na página inicial para ler a matéria.";
+    document.querySelector(".article").before(status);
+    return;
+  }
   const article = document.querySelector(".article"); article.hidden = true;
   const status = document.createElement("p"); status.className = "empty-state"; status.role = "status"; status.textContent = "Carregando matéria…"; article.before(status);
   try {
