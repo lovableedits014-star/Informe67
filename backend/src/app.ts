@@ -41,6 +41,7 @@ function createDatabasePool() {
 export function buildApp(database: HealthDatabase = createDatabasePool(), options: { adminStore?: AdminStore; adminOrigin?: string; secureCookies?: boolean; sessionTtlMs?: number; newsStore?: NewsStore; newsScheduler?: boolean; bannerStore?: BannerStore; rewriteService?:RewriteService } = {}) {
   const app = Fastify({
     logger: true,
+    routerOptions: { maxParamLength: 260 },
   });
 
   const production = process.env.NODE_ENV === "production";

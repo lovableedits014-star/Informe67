@@ -6,10 +6,10 @@ import { buildApp } from '../src/app.js';
 import type { AdminStore } from '../src/admin/store.js';
 import type { NewsStore } from '../src/news/store.js';
 
-function fixture() {
+function fixture(publicBySlug: NewsStore['publicBySlug'] = async()=>undefined) {
   const queries: string[] = [];
   const adminStore: AdminStore = { findByEmail: async () => undefined, findById: async () => undefined, dashboard: async () => ({counts:{},recentNews:[]}), list: async () => [], audit: async () => {} };
-  const newsStore: NewsStore = { list: async () => ({items:[],total:0,page:1,pageSize:20}),get:async()=>undefined,options:async()=>({categories:[],tags:[]}),save:async()=>{throw Error('Read-only fixture');},publishDue:async()=>0,publicList:async()=>[],publicBySlug:async()=>undefined,publicBrowse:async()=>({items:[],total:0,page:1,pageSize:12,categories:[],featured:[]}) };
+  const newsStore: NewsStore = { list: async () => ({items:[],total:0,page:1,pageSize:20}),get:async()=>undefined,options:async()=>({categories:[],tags:[]}),save:async()=>{throw Error('Read-only fixture');},publishDue:async()=>0,publicList:async()=>[],publicBySlug,publicBrowse:async()=>({items:[],total:0,page:1,pageSize:12,categories:[],featured:[]}) };
   const app=buildApp({query:async(text)=>{queries.push(text);return{rows:[]};},end:async()=>{}},{adminStore,newsStore,adminOrigin:'http://localhost:3000'});
   return{app,queries};
 }
@@ -37,6 +37,14 @@ test('static homepage preserves admin, API and media routing and does not provid
     const result=await app.inject(path);assert.equal(result.statusCode,404,path);assert.equal(result.body.includes('<!doctype html>'),false,path);
   }
   assert.deepEqual(queries,[]);
+});
+
+test('public article route accepts validated slugs longer than the router default',async t=>{
+  const slug='inteligencia-artificial-pode-esclarecer-duvidas-mas-nao-substitui-diagnostico-em-saude-mental-alerta-psiquiatra-7f307757';
+  assert.ok(slug.length>100);
+  const{app}=fixture(async requested=>requested===slug?{slug,title:'Matéria publicada',content:'<p>Conteúdo publicado.</p>',images:[],tags:[]}:undefined);t.after(()=>app.close());
+  const response=await app.inject(`/api/news/${slug}`);
+  assert.equal(response.statusCode,200);assert.equal(response.json().slug,slug);
 });
 
 test('public static directory never exposes secrets, backend files or traversal targets',async t=>{
