@@ -35,6 +35,8 @@ test('literal or almost literal AI output is refused instead of treating the sou
  assert.throws(()=>assertRewritten({...generated,content:`<p>${source.text}</p>`},source),{statusCode:422});
  assert.throws(()=>assertRewritten({...generated,content:`<p>${paragraph}</p>`},source),{statusCode:422});
  assert.throws(()=>assertRewritten({...generated,content:withCredits(`<p>${source.text}</p>`,source)},source),{statusCode:422});
+ const lightlyEdited=source.text.replaceAll('prefeitura','administração municipal').replaceAll('segunda-feira','início da semana').replaceAll('melhoria','mudança');
+ assert.throws(()=>assertRewritten({...generated,content:`<h2>Novo título</h2><p>${lightlyEdited}</p>`},source),{statusCode:422});
  assert.doesNotThrow(()=>assertRewritten(generated,source));
 });
 test('rewrite popup shows the saved formatted article, publishes the same content and exposes regeneration',async()=>{
