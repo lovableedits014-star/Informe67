@@ -32,6 +32,26 @@ export async function validateAI(value:unknown,old?:AIConfig):Promise<AIConfig>{
 }
 export const publicAI=(config?:AIConfig)=>config?{provider:config.provider,model:config.model,instructions:config.instructions,dailyLimit:config.dailyLimit,maxChars:config.maxChars,hasKey:Boolean(config.encryptedKey)}:{...defaultAI,hasKey:false};
 export type Generated = {title:string;summary:string;content:string;tags:string[];seoTitle:string;seoDescription:string;warnings:string[]};
+const generatedSchema={
+  type:'object',
+  properties:{
+    title:{type:'string'},summary:{type:'string'},content:{type:'string'},
+    tags:{type:'array',items:{type:'string'}},seoTitle:{type:'string'},
+    seoDescription:{type:'string'},warnings:{type:'array',items:{type:'string'}},
+  },
+  required:['title','summary','content','tags','seoTitle','seoDescription','warnings'],
+  additionalProperties:false,
+};
+function normalizeGenerated(value:unknown):unknown{
+  if(!value||typeof value!=='object'||Array.isArray(value))return value;
+  const result={...(value as Record<string,unknown>)};
+  if(typeof result.summary!=='string'||!result.summary.trim()){
+    const alternative=[result.resumo,result.seoDescription,result.description,result.excerpt].find(item=>typeof item==='string'&&item.trim()) as string|undefined;
+    if(alternative)result.summary=alternative.trim().slice(0,500);
+    else if(typeof result.content==='string')result.summary=sanitizeHtml(result.content,{allowedTags:[],allowedAttributes:{}}).replace(/\s+/g,' ').trim().slice(0,500);
+  }
+  return result;
+}
 export function assertRewritten(result:Generated,source:Source){
   const normalize=(text:string)=>sanitizeHtml(text,{allowedTags:[],allowedAttributes:{}}).normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
   const original=normalize(source.text),rewritten=normalize(result.content.replace(/<p\b[^>]*>\s*Fonte:[\s\S]*?<\/p>/gi,'')),words=rewritten.split(' '),sourceWords=original.split(' ');
@@ -53,7 +73,7 @@ export async function callAI(config:AIConfig,source:Source,fetcher:typeof fetch=
   const prompt=JSON.stringify({source:{title:source.title,vehicle:source.siteName,author:source.author,publishedAt:source.publishedAt,text:source.text},...(previousText?{previousVersion:sanitizeHtml(previousText,{allowedTags:[],allowedAttributes:{}}).slice(0,20000),revisionInstruction:'Crie uma nova redação e organização das frases, diferente da versão anterior. Os fatos devem vir exclusivamente da fonte original. Não acrescente informações da versão anterior que não existam na fonte.'}:{})});
   let endpoint:string,headers:Record<string,string>,body:unknown;
   if(config.provider==='gemini'){endpoint=`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent`;headers={'x-goog-api-key':secret};body={systemInstruction:{parts:[{text:system}]},contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json',maxOutputTokens:8192}};}
-  else if(config.provider==='groq'){endpoint='https://api.groq.com/openai/v1/chat/completions';headers={Authorization:`Bearer ${secret}`};body={model:config.model,messages:[{role:'system',content:system},{role:'user',content:prompt}],response_format:{type:'json_object'},max_completion_tokens:4096,stream:false,...(config.model.startsWith('openai/gpt-oss-')?{reasoning_effort:'low'}:{})};}
+  else if(config.provider==='groq'){endpoint='https://api.groq.com/openai/v1/chat/completions';headers={Authorization:`Bearer ${secret}`};const strict=/^openai\/gpt-oss-(?:20b|120b)$/.test(config.model);body={model:config.model,messages:[{role:'system',content:system},{role:'user',content:prompt}],response_format:strict?{type:'json_schema',json_schema:{name:'news_rewrite',strict:true,schema:generatedSchema}}:{type:'json_object'},max_completion_tokens:4096,stream:false,...(config.model.startsWith('openai/gpt-oss-')?{reasoning_effort:'low'}:{})};}
   else{endpoint='https://api.anthropic.com/v1/messages';headers={'x-api-key':secret,'anthropic-version':'2023-06-01'};body={model:config.model,max_tokens:8192,system,messages:[{role:'user',content:prompt}]};}
   let response:Response;try{response=await fetcher(endpoint,{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body),signal:AbortSignal.timeout(90000),redirect:'error'});}catch{throw new NewsError(502,'A IA não respondeu dentro do prazo. Confira o histórico antes de tentar novamente.');}
   if(response.status===404)throw new NewsError(400,`O modelo ${config.model} não está disponível na sua conta. Escolha um modelo disponível em Configurações e teste a conexão.`);
@@ -69,5 +89,5 @@ export async function callAI(config:AIConfig,source:Source,fetcher:typeof fetch=
   const reported=config.provider==='gemini'?data.usageMetadata:data.usage;
   const allowed=['promptTokenCount','candidatesTokenCount','totalTokenCount','cachedContentTokenCount','thoughtsTokenCount','input_tokens','output_tokens','cache_creation_input_tokens','cache_read_input_tokens','prompt_tokens','completion_tokens','total_tokens'];
   const usage:Record<string,unknown>={};for(const key of allowed)if(Number.isSafeInteger(reported?.[key])&&reported[key]>=0)usage[key]=reported[key];
-  const result=validateGenerated(parsed);assertRewritten(result,source);return{result,usage};
+  const result=validateGenerated(normalizeGenerated(parsed));assertRewritten(result,source);return{result,usage};
 }
