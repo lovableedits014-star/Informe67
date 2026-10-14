@@ -1,12 +1,12 @@
 :root {
   color-scheme: light;
-  --ink: #202521;
+  --ink: #162b40;
   --muted: #737974;
   --paper: #f8f7f4;
   --white: #fff;
   --line: #e7e5df;
-  --accent: #d44636;
-  --accent-dark: #b63528;
+  --accent: #196b59;
+  --accent-dark: #124e42;
   --serif: "Playfair Display", Georgia, serif;
   --sans: "DM Sans", Arial, sans-serif;
 }

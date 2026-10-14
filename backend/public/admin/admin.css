@@ -6,3 +6,30 @@
 .rewrite-cover{display:block;width:100%;max-width:650px;max-height:340px;object-fit:contain;margin:20px 0}.rewrite-source-text{white-space:pre-wrap;max-height:400px;overflow:auto}.rewrite-history-row{display:flex;align-items:center;gap:20px;padding:18px 24px;border-top:1px solid var(--line)}.rewrite-history-row>div{flex:1;min-width:0;overflow-wrap:anywhere}.rewrite-history-row p{font-size:12px}.card-body details{margin:20px 0}.card-body details form label{display:block;margin:15px 0 6px}.card-body details form input,.card-body details form textarea{display:block;margin-top:8px}.card-body>.news-controls{margin-top:25px}@media(max-width:600px){.rewrite-history-row{flex-wrap:wrap}}
 .rewrite-feedback{position:sticky;bottom:12px;z-index:5;padding:14px 18px;border-radius:8px;background:#eaf3ee;border:1px solid #b8d7c3;box-shadow:0 4px 18px #0001;margin-top:18px;overflow-wrap:anywhere}.rewrite-feedback.error{background:#fff0ec;border-color:#e9b8aa;color:#982c20}
 .rewrite-popup{width:min(1180px,96vw);max-width:96vw;height:94vh;max-height:94vh;padding:20px;border:0;border-radius:14px;box-shadow:0 20px 80px #0004;overflow:auto}.rewrite-popup::backdrop{background:#17231bd0}.rewrite-popup-header{display:flex;justify-content:space-between;align-items:center;gap:20px}.rewrite-popup iframe{width:100%;height:calc(100% - 220px);min-height:320px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}.rewrite-popup-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;position:sticky;bottom:0;background:var(--paper);padding:15px 0}.rewrite-popup-schedule{display:flex;gap:12px;align-items:end}.rewrite-popup-schedule label{font-size:12px}.rewrite-popup-schedule input{display:block;margin-top:4px}@media(max-width:650px){.rewrite-popup{padding:12px}.rewrite-popup-actions button{flex:1}.rewrite-popup-schedule{width:100%;flex-wrap:wrap}}
+
+/* Identidade visual Informe67 — sincronizada com o portal público. */
+:root{--ink:#162b40;--accent:#196b59;--dark:#124e42;--brand-blue:#14a7c2;--brand-lime:#cadc43;--brand-gradient:linear-gradient(90deg,#cadc43,#45b76c 48%,#14a7c2);--serif:"Playfair Display",Georgia,serif;--sans:"DM Sans",Arial,sans-serif}
+body{font-family:var(--sans)}
+:focus-visible{outline-color:#14a7c266}
+.brand{display:inline-flex;align-items:center;width:fit-content}
+.brand-logo{display:block;width:clamp(180px,22vw,245px);max-width:100%;height:auto}
+.login-story{background:linear-gradient(145deg,#102c43 0%,#124e42 58%,#0d7890 100%)}
+.login-story:before{position:absolute;inset:auto -18% -30% 10%;height:58%;background:var(--brand-gradient);border-radius:50%;filter:blur(85px);content:"";opacity:.19;pointer-events:none}
+.login-story:after{color:#ffffff08;font-family:var(--serif)}
+.login-story .brand-logo{width:min(290px,72%);filter:drop-shadow(0 8px 22px #00182d55)}
+.login-story h1{font-family:var(--serif)}
+.login-story .eyebrow{color:#9ee4e2}
+.login-story p:not(.eyebrow){color:#d0e1df}
+.story-footer{color:#b7d2d0}
+.sidebar{border-top:4px solid transparent;border-image:var(--brand-gradient) 1}
+.sidebar .brand{margin:0 6px 38px}
+.sidebar .brand-logo{width:184px}
+.nav-button.active{background:#eaf4f0;color:var(--accent)}
+.nav-button:hover{background:#f0f6f4}
+.stat-icon{background:#e8f4f1}
+.avatar{background:#e5f3f0;color:var(--accent)}
+.page-heading h1,.login-form h2{font-family:var(--serif);font-weight:700}
+.primary{background:var(--accent)}
+.primary:hover{background:var(--dark)}
+.quick-link:hover,.secondary:hover{border-color:var(--brand-blue);color:var(--accent)}
+@media(max-width:720px){.login-story .brand-logo{width:210px}.sidebar{border-top:0;border-left:4px solid var(--brand-blue)}}
